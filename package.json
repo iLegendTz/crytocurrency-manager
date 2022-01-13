@@ -1,0 +1,23 @@
+{
+  "name": "crytocurrency-manager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron src/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iLegendTz/crytocurrency-manager.git"
+  },
+  "author": "ilegendtz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/iLegendTz/crytocurrency-manager/issues"
+  },
+  "homepage": "https://github.com/iLegendTz/crytocurrency-manager#readme",
+  "devDependencies": {
+    "electron": "^16.0.7"
+  }
+}
