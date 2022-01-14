@@ -21,6 +21,7 @@
     "electron": "^16.0.7"
   },
   "dependencies": {
+    "ccxt": "^1.67.51",
     "electron-reload": "^2.0.0-alpha.1"
   }
 }
