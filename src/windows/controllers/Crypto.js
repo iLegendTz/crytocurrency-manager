@@ -37,7 +37,6 @@ const initCryptoList = async (platformOption) => {
   await platform
     .loadMarkets()
     .then((cryptos) => {
-      console.log(cryptos);
       for (const [key, value] of Object.entries(cryptos)) {
         let opt = document.createElement("option");
         opt.value = value.symbol;
@@ -46,7 +45,7 @@ const initCryptoList = async (platformOption) => {
       }
     })
     .then(() => {
-      setCurrentPriceIndicator(platform, selectCrypto.value);
+      setCurrentValues(platform, selectCrypto.value);
       selectCrypto.removeAttribute("disabled");
     });
 
@@ -57,28 +56,42 @@ const initCryptoList = async (platformOption) => {
 
     document.getElementById("info-container").setAttribute("hidden", true);
 
-    setCurrentPriceIndicator(platform, selectCrypto.value);
+    setCurrentValues(platform, selectCrypto.value);
   };
 };
 
-const setCurrentPriceIndicator = (platform, crypto) => {
+const setCurrentValues = (platform, crypto) => {
   currentPriceInterval = setInterval(async () => {
     let ticker = await platform.fetchTicker(crypto);
-    document.getElementById("actual-price").innerText = formatPrice(
+
+    document.getElementById("last-price").innerText = formatValue(
       ticker.last.toString()
     );
-    document.getElementById("info-container").removeAttribute("hidden");
 
-    console.log(ticker);
+    document.getElementById("change-price-value").innerText =
+      formatValue(ticker.change.toString()) +
+      " | " +
+      ticker.percentage.toFixed(2) +
+      "%";
+
+    document.getElementById("max-price-value").innerHTML = formatValue(
+      ticker.last.toString()
+    );
+
+    document.getElementById("min-price-value").innerHTML = formatValue(
+      ticker.low.toString()
+    );
+
+    document.getElementById("info-container").removeAttribute("hidden");
   }, 2000);
 };
 
-function formatPrice(price) {
-  if (price.charAt(0) === "0") return price;
-  let formatedPrice = "0.0";
-  formatedPrice =
-    price.slice(0, price.indexOf(".")) +
-    price.toString().slice(price.indexOf("."), price.indexOf(".") + 3);
+function formatValue(value) {
+  if (value.charAt(0) === "0") return value;
+  let formatedValue = "0.0";
+  formatedValue =
+    value.slice(0, value.indexOf(".")) +
+    value.toString().slice(value.indexOf("."), value.indexOf(".") + 3);
 
-  return formatedPrice;
+  return formatedValue;
 }
