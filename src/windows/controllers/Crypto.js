@@ -17,7 +17,8 @@ exports.initMarketList = () => {
     if (currentPriceInterval != null) {
       clearInterval(currentPriceInterval);
     }
-    document.getElementById("info-container").setAttribute("hidden", true);
+    document.getElementById("info-container").style.visibility = "hidden";
+
     initCryptoList(selectPlatform.value);
   };
 
@@ -54,44 +55,44 @@ const initCryptoList = async (platformOption) => {
       clearInterval(currentPriceInterval);
     }
 
-    document.getElementById("info-container").setAttribute("hidden", true);
-
+    document.getElementById("info-container").style.visibility = "hidden";
     setCurrentValues(platform, selectCrypto.value);
   };
 };
 
 const setCurrentValues = (platform, crypto) => {
   currentPriceInterval = setInterval(async () => {
-    let ticker = await platform.fetchTicker(crypto);
+    // console.log(await platform.fetchOrderBook(crypto));
+    await platform
+      .fetchTicker(crypto)
+      .then((ticker) => {
+        document.getElementById("last-price").innerText =
+          "$" + formatValue(ticker.last.toString());
 
-    document.getElementById("last-price").innerText = formatValue(
-      ticker.last.toString()
-    );
+        document.getElementById("change-price-value").innerText =
+          formatValue(ticker.change.toString()) +
+          " | " +
+          ticker.percentage.toFixed(2) +
+          "%";
 
-    document.getElementById("change-price-value").innerText =
-      formatValue(ticker.change.toString()) +
-      " | " +
-      ticker.percentage.toFixed(2) +
-      "%";
+        document.getElementById("max-price-value").innerHTML =
+          "$" + formatValue(ticker.last.toString());
 
-    document.getElementById("max-price-value").innerHTML = formatValue(
-      ticker.last.toString()
-    );
-
-    document.getElementById("min-price-value").innerHTML = formatValue(
-      ticker.low.toString()
-    );
-
-    document.getElementById("info-container").removeAttribute("hidden");
+        document.getElementById("min-price-value").innerHTML =
+          "$" + formatValue(ticker.low.toString());
+      })
+      .then(() => {
+        document.getElementById("info-container").style.visibility = "visible";
+      });
   }, 2000);
 };
 
 function formatValue(value) {
   if (value.charAt(0) === "0") return value;
-  let formatedValue = "0.0";
+  let formatedValue = 0.0;
   formatedValue =
     value.slice(0, value.indexOf(".")) +
     value.toString().slice(value.indexOf("."), value.indexOf(".") + 3);
 
-  return formatedValue;
+  return parseFloat(formatedValue).toLocaleString();
 }
