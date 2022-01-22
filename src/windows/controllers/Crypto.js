@@ -1,6 +1,9 @@
 const ccxt = require("ccxt");
+const Chart = require("chart.js");
 
-let currentPriceInterval;
+let currentPriceInterval, updateChartInterval;
+let closingChart;
+let isTimePassedToUpdateChart = false;
 
 exports.initMarketList = () => {
   let selectPlatform = document.getElementById("platforms");
@@ -14,10 +17,11 @@ exports.initMarketList = () => {
   });
 
   selectPlatform.onchange = () => {
-    if (currentPriceInterval != null) {
-      clearInterval(currentPriceInterval);
-    }
-    document.getElementById("info-container").style.visibility = "hidden";
+    destroyChart(closingChart);
+    clearAllIntervals();
+    document.getElementsByName("info-container").forEach((element) => {
+      element.style.visibility = "hidden";
+    });
 
     initCryptoList(selectPlatform.value);
   };
@@ -47,52 +51,152 @@ const initCryptoList = async (platformOption) => {
     })
     .then(() => {
       setCurrentValues(platform, selectCrypto.value);
+      setChart(platform, selectCrypto.value);
       selectCrypto.removeAttribute("disabled");
     });
 
   selectCrypto.onchange = () => {
-    if (currentPriceInterval != null) {
-      clearInterval(currentPriceInterval);
-    }
+    clearAllIntervals();
+    destroyChart(closingChart);
 
-    document.getElementById("info-container").style.visibility = "hidden";
+    document.getElementsByName("info-container").forEach((element) => {
+      element.style.visibility = "hidden";
+    });
     setCurrentValues(platform, selectCrypto.value);
+    setChart(platform, selectCrypto.value);
   };
 };
 
 const setCurrentValues = (platform, crypto) => {
   currentPriceInterval = setInterval(async () => {
-    // console.log(await platform.fetchOrderBook(crypto));
     await platform
       .fetchTicker(crypto)
       .then((ticker) => {
         document.getElementById("last-price").innerText =
-          "$" + formatValue(ticker.last.toString());
+          "$" + formatValue(ticker.last.toString()).toLocaleString();
 
         document.getElementById("change-price-value").innerText =
-          formatValue(ticker.change.toString()) +
+          formatValue(ticker.change.toString()).toLocaleString() +
           " | " +
           ticker.percentage.toFixed(2) +
           "%";
 
         document.getElementById("max-price-value").innerHTML =
-          "$" + formatValue(ticker.last.toString());
+          "$" + formatValue(ticker.last.toString()).toLocaleString();
 
         document.getElementById("min-price-value").innerHTML =
-          "$" + formatValue(ticker.low.toString());
+          "$" + formatValue(ticker.low.toString()).toLocaleString();
+
+        // updateChart(ticker);
       })
       .then(() => {
-        document.getElementById("info-container").style.visibility = "visible";
+        document.getElementsByName("info-container").forEach((element) => {
+          element.style.visibility = "visible";
+        });
       });
   }, 2000);
 };
 
-function formatValue(value) {
-  if (value.charAt(0) === "0") return value;
+const setChart = async (platform, crypto) => {
+  await platform.fetchOHLCV(crypto, "1d").then((ohlcv) => {
+    let labels = [];
+    let data = [];
+
+    ohlcv.forEach((e) => {
+      labels.push(timestampToFormatedDate(e[0]));
+      data.push(e[4]);
+    });
+
+    const chartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: crypto,
+          data: data,
+          fill: false,
+          borderColor: "rgb(75, 192, 192)",
+          tension: 0.1,
+        },
+      ],
+    };
+
+    const config = {
+      type: "line",
+      data: chartData,
+    };
+
+    if (!closingChart) {
+      closingChart = new Chart(
+        document.getElementById("closing-chart"),
+        config
+      );
+    }
+  });
+};
+
+const updateChart = (ticker) => {
+  if (!updateChartInterval) {
+    updateChartInterval = setInterval(
+      (isTimePassedToUpdateChart = true),
+      time
+    ); /* TODO agregar el tiempo seleccionado en el select */
+  }
+
+  if (closingChart && isTimePassedToUpdateChart) {
+    addChartData(
+      closingChart,
+      timestampToFormatedDate(ticker.timestamp),
+      formatValue(ticker.last.toString())
+    );
+
+    isTimePassedToUpdateChart = false;
+    clearInterval(updateChartInterval);
+    updateChartInterval = null;
+  }
+};
+
+const addChartData = (chart, label, data) => {
+  chart.data.datasets[0].data.push(data);
+  chart.data.labels.push(label);
+  chart.update();
+};
+
+const destroyChart = (chart) => {
+  chart.destroy();
+  closingChart = null;
+};
+
+const formatValue = (value) => {
+  if (value.charAt(0) === "0" || value.slice(0, 2) === "-0") return value;
   let formatedValue = 0.0;
   formatedValue =
     value.slice(0, value.indexOf(".")) +
     value.toString().slice(value.indexOf("."), value.indexOf(".") + 3);
 
-  return parseFloat(formatedValue).toLocaleString();
-}
+  return parseFloat(formatedValue);
+};
+
+const timestampToFormatedDate = (timestamp) => {
+  const date = new Date(timestamp);
+  const dateValues =
+    date.getFullYear() +
+    "/" +
+    date.getMonth() +
+    1 +
+    "/" +
+    date.getDate() +
+    " " +
+    date.getHours() +
+    ":" +
+    date.getMinutes() +
+    ":" +
+    date.getSeconds();
+
+  return dateValues;
+};
+
+const clearAllIntervals = () => {
+  if (currentPriceInterval != null) {
+    clearInterval(currentPriceInterval);
+  }
+};

@@ -21,7 +21,7 @@
       <select id="cryptos"></select>
     </div>
 
-    <div id="info-container" class="container information">
+    <div name="info-container" class="container information invisible">
       <div id="last-price"></div>
 
       <div id="change-price">
@@ -38,6 +38,17 @@
         <div class="title">24 Minimo</div>
         <div id="min-price-value"></div>
       </div>
+    </div>
+
+    <div name="info-container" class="invisible">
+      <select id="timeframes">
+        <option value="1m">1 Minuto</option>
+        <option value="1h">1 Hora</option>
+        <option value="1d">1 Dia</option>
+        <option value="1M">1 Mes</option>
+        <option value="1y">1 Ano</option>
+      </select>
+      <canvas id="closing-chart"></canvas>
     </div>
   </body>
 </html>

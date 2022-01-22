@@ -19,5 +19,8 @@ body {
 .information {
   min-width: 100px;
   gap: 50px;
+}
+
+.invisible {
   visibility: hidden;
 }
