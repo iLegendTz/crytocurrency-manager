@@ -23,6 +23,7 @@
   "dependencies": {
     "ccxt": "^1.67.51",
     "chart.js": "^3.7.0",
+    "chartjs-plugin-zoom": "^1.2.0",
     "electron-reload": "^2.0.0-alpha.1"
   }
 }
