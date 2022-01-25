@@ -1,5 +1,6 @@
 const ccxt = require("ccxt");
 const Chart = require("chart.js");
+const zoomPlugin = require("chartjs-plugin-zoom");
 
 let currentPriceInterval, updateChartInterval;
 let closingChart;
@@ -155,6 +156,21 @@ const setChart = async (platform, crypto) => {
     const config = {
       type: "line",
       data: chartData,
+      options: {
+        plugins: {
+          zoom: {
+            zoom: {
+              wheel: {
+                enabled: true,
+              },
+              pinch: {
+                enabled: true,
+              },
+              mode: "x",
+            },
+          },
+        },
+      },
     };
 
     if (!closingChart) {
