@@ -55,6 +55,15 @@ const initCryptoList = async (platformOption) => {
       selectCrypto.removeAttribute("disabled");
     });
 
+  document.getElementById("timeframes").onchange = async (option) => {
+    document.getElementById("timeframes").style.visibility = "hidden";
+    clearInterval(updateChartInterval);
+    destroyChart(closingChart);
+    await setChart(platform, selectCrypto.value);
+
+    document.getElementById("timeframes").style.visibility = "visible";
+  };
+
   selectCrypto.onchange = () => {
     clearAllIntervals();
     destroyChart(closingChart);
@@ -87,7 +96,7 @@ const setCurrentValues = (platform, crypto) => {
         document.getElementById("min-price-value").innerHTML =
           "$" + formatValue(ticker.low.toString()).toLocaleString();
 
-        // updateChart(ticker);
+        configureChartInterval(ticker);
       })
       .then(() => {
         document.getElementsByName("info-container").forEach((element) => {
@@ -98,7 +107,30 @@ const setCurrentValues = (platform, crypto) => {
 };
 
 const setChart = async (platform, crypto) => {
-  await platform.fetchOHLCV(crypto, "1d").then((ohlcv) => {
+  let chartTimeFrame = "1m";
+  switch (document.getElementById("timeframes").value) {
+    case "1":
+      chartTimeFrame = "1m";
+      break;
+
+    case "60":
+      chartTimeFrame = "1h";
+      break;
+
+    case "1440":
+      chartTimeFrame = "1d";
+      break;
+
+    case "43800":
+      chartTimeFrame = "1M";
+      break;
+
+    case "525600":
+      chartTimeFrame = "1y";
+      break;
+  }
+
+  await platform.fetchOHLCV(crypto, chartTimeFrame).then((ohlcv) => {
     let labels = [];
     let data = [];
 
@@ -134,12 +166,13 @@ const setChart = async (platform, crypto) => {
   });
 };
 
-const updateChart = (ticker) => {
+const configureChartInterval = (ticker) => {
+  const time = document.getElementById("timeframes").value;
+
   if (!updateChartInterval) {
-    updateChartInterval = setInterval(
-      (isTimePassedToUpdateChart = true),
-      time
-    ); /* TODO agregar el tiempo seleccionado en el select */
+    updateChartInterval = setInterval(() => {
+      isTimePassedToUpdateChart = true;
+    }, 1000 * 60 * time);
   }
 
   if (closingChart && isTimePassedToUpdateChart) {
@@ -198,5 +231,8 @@ const timestampToFormatedDate = (timestamp) => {
 const clearAllIntervals = () => {
   if (currentPriceInterval != null) {
     clearInterval(currentPriceInterval);
+  }
+  if (updateChartInterval != null) {
+    clearInterval(updateChartInterval);
   }
 };
