@@ -91,6 +91,20 @@ const setCurrentValues = (platform, crypto) => {
         try {
           document.getElementById("last-price").innerText =
             "$" + formatValue(ticker.last.toString()).toLocaleString();
+
+          if (
+            document.getElementById("low-limit").value ==
+              formatValue(ticker.last.toString()) ||
+            document.getElementById("max-limit").value ==
+              formatValue(ticker.last.toString())
+          ) {
+            new Notification("Limite de Criptomoneda alcanzado", {
+              body:
+                crypto +
+                " alcanzo el precio de " +
+                formatValue(ticker.last.toString()).toLocaleString(),
+            });
+          }
         } catch (e) {
           document.getElementById("last-price").innerText = "No info";
         }
@@ -234,7 +248,12 @@ const destroyChart = () => {
 };
 
 const formatValue = (value) => {
-  if (value.charAt(0) === "0" || value.slice(0, 2) === "-0") return value;
+  if (
+    value.charAt(0) === "0" ||
+    value.slice(0, 2) === "-0" ||
+    !value.includes(".")
+  )
+    return value;
   let formatedValue = 0.0;
   formatedValue =
     value.slice(0, value.indexOf(".")) +
