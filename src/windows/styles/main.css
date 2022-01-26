@@ -24,3 +24,7 @@ body {
 .invisible {
   visibility: hidden;
 }
+
+#closing-chart {
+  max-height: 800px;
+}
