@@ -18,9 +18,9 @@ exports.initMarketList = () => {
   });
 
   selectPlatform.onchange = () => {
-    destroyChart(closingChart);
+    destroyChart();
     clearAllIntervals();
-    document.getElementsByName("info-container").forEach((element) => {
+    [...document.getElementsByClassName("invisible")].forEach((element) => {
       element.style.visibility = "hidden";
     });
 
@@ -57,19 +57,25 @@ const initCryptoList = async (platformOption) => {
     });
 
   document.getElementById("timeframes").onchange = async (option) => {
-    document.getElementById("timeframes").style.visibility = "hidden";
-    clearInterval(updateChartInterval);
-    destroyChart(closingChart);
-    await setChart(platform, selectCrypto.value);
+    [...document.getElementsByClassName("invisible")].forEach((element) => {
+      element.style.visibility = "hidden";
+    });
 
-    document.getElementById("timeframes").style.visibility = "visible";
+    clearInterval(updateChartInterval);
+    destroyChart();
+
+    await setChart(platform, selectCrypto.value).then(() => {
+      [...document.getElementsByClassName("invisible")].forEach((element) => {
+        element.style.visibility = "visible";
+      });
+    });
   };
 
   selectCrypto.onchange = () => {
     clearAllIntervals();
-    destroyChart(closingChart);
+    destroyChart();
 
-    document.getElementsByName("info-container").forEach((element) => {
+    [...document.getElementsByClassName("invisible")].forEach((element) => {
       element.style.visibility = "hidden";
     });
     setCurrentValues(platform, selectCrypto.value);
@@ -82,27 +88,47 @@ const setCurrentValues = (platform, crypto) => {
     await platform
       .fetchTicker(crypto)
       .then((ticker) => {
-        document.getElementById("last-price").innerText =
-          "$" + formatValue(ticker.last.toString()).toLocaleString();
+        try {
+          document.getElementById("last-price").innerText =
+            "$" + formatValue(ticker.last.toString()).toLocaleString();
+        } catch (e) {
+          document.getElementById("last-price").innerText = "No info";
+        }
 
-        document.getElementById("change-price-value").innerText =
-          formatValue(ticker.change.toString()).toLocaleString() +
-          " | " +
-          ticker.percentage.toFixed(2) +
-          "%";
+        try {
+          document.getElementById("change-price-value").innerText =
+            formatValue(ticker.change.toString()).toLocaleString() +
+            " | " +
+            ticker.percentage.toFixed(2) +
+            "%";
+        } catch (e) {
+          document.getElementById("change-price-value").innerText = "No info";
+        }
 
-        document.getElementById("max-price-value").innerHTML =
-          "$" + formatValue(ticker.last.toString()).toLocaleString();
+        try {
+          document.getElementById("max-price-value").innerHTML =
+            "$" + formatValue(ticker.last.toString()).toLocaleString();
+        } catch (e) {
+          document.getElementById("max-price-value").innerHTML = "No info";
+        }
 
-        document.getElementById("min-price-value").innerHTML =
-          "$" + formatValue(ticker.low.toString()).toLocaleString();
+        try {
+          document.getElementById("min-price-value").innerHTML =
+            "$" + formatValue(ticker.low.toString()).toLocaleString();
+        } catch (e) {
+          document.getElementById("min-price-value").innerHTML = "No info";
+        }
 
         configureChartInterval(ticker);
       })
       .then(() => {
-        document.getElementsByName("info-container").forEach((element) => {
-          element.style.visibility = "visible";
-        });
+        if (closingChart) {
+          [...document.getElementsByClassName("invisible")].forEach(
+            (element) => {
+              element.style.visibility = "visible";
+            }
+          );
+        }
       });
   }, 2000);
 };
@@ -120,14 +146,6 @@ const setChart = async (platform, crypto) => {
 
     case "1440":
       chartTimeFrame = "1d";
-      break;
-
-    case "43800":
-      chartTimeFrame = "1M";
-      break;
-
-    case "525600":
-      chartTimeFrame = "1y";
       break;
   }
 
@@ -210,8 +228,8 @@ const addChartData = (chart, label, data) => {
   chart.update();
 };
 
-const destroyChart = (chart) => {
-  chart.destroy();
+const destroyChart = () => {
+  closingChart.destroy();
   closingChart = null;
 };
 

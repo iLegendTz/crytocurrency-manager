@@ -40,15 +40,18 @@
       </div>
     </div>
 
-    <div name="info-container" class="invisible">
+    <div id="timeframes-container" class="invisible">
       <select id="timeframes">
         <option value="1">Minuto</option>
         <option value="60">Hora</option>
         <option value="1440">Dia</option>
-        <option value="43800">Mes</option>
-        <option value="525600">Ano</option>
       </select>
       <canvas id="closing-chart"></canvas>
+    </div>
+
+    <div name="limits-container" class="invisible">
+      <input type="number" name="low-limit" id="low-limit" />
+      <input type="number" name="max-limit" id="max-limit" />
     </div>
   </body>
 </html>
