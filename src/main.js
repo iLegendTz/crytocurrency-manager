@@ -1,8 +1,7 @@
 const { app, BrowserWindow, Menu } = require("electron");
+const isDev = require("electron-is-dev");
 
-const isProduction = process.env.NODE_ENV === "production";
-
-if (!isProduction) {
+if (isDev) {
   require("electron-reload")(__dirname);
 }
 
@@ -34,7 +33,7 @@ const createWindow = () => {
 const createMenu = (win) => {
   let menu = Menu.buildFromTemplate([]);
 
-  if (!isProduction) {
+  if (isDev) {
     const template = [
       {
         label: "devTools",
