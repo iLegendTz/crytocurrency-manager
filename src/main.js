@@ -25,7 +25,7 @@ const createWindow = () => {
 
   createMenu(win);
 
-  win.loadFile("windows/views/index.html");
+  win.loadFile(path.join(__dirname, "windows/views/index.html"));
   win.once("ready-to-show", () => {
     win.show();
   });
