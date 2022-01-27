@@ -1,5 +1,10 @@
 const { app, BrowserWindow, Menu } = require("electron");
-require("electron-reload")(__dirname);
+
+const isProduction = process.env.NODE_ENV === "production";
+
+if (!isProduction) {
+  require("electron-reload")(__dirname);
+}
 
 const path = require("path");
 
@@ -27,15 +32,20 @@ const createWindow = () => {
 };
 
 const createMenu = (win) => {
-  const template = [
-    {
-      label: "devTools",
-      click: () => {
-        win.webContents.openDevTools();
+  let menu = Menu.buildFromTemplate([]);
+
+  if (!isProduction) {
+    const template = [
+      {
+        label: "devTools",
+        click: () => {
+          win.webContents.openDevTools();
+        },
       },
-    },
-  ];
-  const menu = Menu.buildFromTemplate(template);
+    ];
+    menu = Menu.buildFromTemplate(template);
+  }
+
   Menu.setApplicationMenu(menu);
 };
 
