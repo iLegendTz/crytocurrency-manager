@@ -267,8 +267,7 @@ const timestampToFormatedDate = (timestamp) => {
   const dateValues =
     date.getFullYear() +
     "/" +
-    date.getMonth() +
-    1 +
+    (parseInt(date.getMonth()) + 1) +
     "/" +
     date.getDate() +
     " " +
