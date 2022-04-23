@@ -116,7 +116,7 @@ const setCurrentValues = (platform, crypto) => {
             document.getElementById("low-limit").value
           ) {
             if (
-              document.getElementById("low-limit").value <=
+              document.getElementById("low-limit").value >=
                 formatValue(ticker.last.toString()) &&
               !editingLowLimit
             ) {
@@ -136,7 +136,7 @@ const setCurrentValues = (platform, crypto) => {
             document.getElementById("max-limit").value
           ) {
             if (
-              document.getElementById("max-limit").value >=
+              document.getElementById("max-limit").value <=
                 formatValue(ticker.last.toString()) &&
               !editingMaxLimit
             ) {
