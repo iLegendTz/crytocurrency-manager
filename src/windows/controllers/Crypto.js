@@ -6,6 +6,9 @@ let currentPriceInterval, updateChartInterval;
 let closingChart;
 let isTimePassedToUpdateChart = false;
 
+let editingLowLimit = false;
+let editingMaxLimit = true;
+
 exports.initMarketList = () => {
   let selectPlatform = document.getElementById("platforms");
   const exchanges = ccxt.exchanges;
@@ -81,6 +84,22 @@ const initCryptoList = async (platformOption) => {
     setCurrentValues(platform, selectCrypto.value);
     setChart(platform, selectCrypto.value);
   };
+
+  document.getElementById("low-limit").onkeydown = (e) => {
+    if (e.key == "Enter") {
+      editingLowLimit = false;
+    } else {
+      editingLowLimit = true;
+    }
+  };
+
+  document.getElementById("max-limit").onkeydown = (e) => {
+    if (e.key == "Enter") {
+      editingMaxLimit = false;
+    } else {
+      editingMaxLimit = true;
+    }
+  };
 };
 
 const setCurrentValues = (platform, crypto) => {
@@ -93,17 +112,43 @@ const setCurrentValues = (platform, crypto) => {
             "$" + formatValue(ticker.last.toString()).toLocaleString();
 
           if (
-            document.getElementById("low-limit").value ==
-              formatValue(ticker.last.toString()) ||
-            document.getElementById("max-limit").value ==
-              formatValue(ticker.last.toString())
+            !isNaN(document.getElementById("low-limit").value) &&
+            document.getElementById("low-limit").value
           ) {
-            new Notification("Limite de Criptomoneda alcanzado", {
-              body:
-                crypto +
-                " alcanzo el precio de " +
-                formatValue(ticker.last.toString()).toLocaleString(),
-            });
+            if (
+              document.getElementById("low-limit").value <=
+                formatValue(ticker.last.toString()) &&
+              !editingLowLimit
+            ) {
+              new Notification("Limite minimo de Criptomoneda alcanzado", {
+                body:
+                  crypto +
+                  " alcanzo el precio de " +
+                  formatValue(ticker.last.toString()).toLocaleString(),
+              });
+
+              document.getElementById("low-limit").value = "";
+            }
+          }
+
+          if (
+            !isNaN(document.getElementById("max-limit").value) &&
+            document.getElementById("max-limit").value
+          ) {
+            if (
+              document.getElementById("max-limit").value >=
+                formatValue(ticker.last.toString()) &&
+              !editingMaxLimit
+            ) {
+              new Notification("Limite maximo de Criptomoneda alcanzado", {
+                body:
+                  crypto +
+                  " alcanzo el precio de " +
+                  formatValue(ticker.last.toString()).toLocaleString(),
+              });
+
+              document.getElementById("max-limit").value = "";
+            }
           }
         } catch (e) {
           document.getElementById("last-price").innerText = "No info";
